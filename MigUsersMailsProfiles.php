@@ -30,7 +30,8 @@ $exc=arrayParaString($EXCLUDE_USERS);
       }else{
         $arr = $ldap->getNewUserInfo($user['mail'],$user['name']);
         $user['new_dn'] = $arr['dn'];
-        $user['new_uid'] = $arr['uid'];      
+        $user['new_uid'] = $arr['uid'];
+              
 
         $sql = "INSERT INTO glpi_users 
                 (name,password,mobile,realname,firstname,locations_id,use_mode,is_active,auths_id,authtype,is_deleted,profiles_id,entities_id,usertitles_id,usercategories_id,user_dn,
