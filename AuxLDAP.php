@@ -66,14 +66,15 @@ class AuxLDAP {
 
         if ($ds) {
 
-            $sr=ldap_search($ds,$base,"mail=$email");
+            //$sr=ldap_search($ds,$base,"mail=$email");
+            $sr=ldap_search($ds,$base,"(|(mail=$email)(uid=$uid))");
             $info = ldap_get_entries($ds, $sr);
 
             if ($info["count"] > 0)
                 return array("dn" => $info[0]["dn"], "uid" => $info[0]["uid"][0]);
 
             else{
-                echo "Couldn't find ".$email." in the new ldap base, returning null for DN ".PHP_EOL;
+                //echo "Couldn't find ".$email." in the new ldap base, returning null for DN ".PHP_EOL;
                 return array("dn" => '', "uid" => "$uid");
             }    
         } else {

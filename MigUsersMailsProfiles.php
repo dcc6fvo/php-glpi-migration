@@ -14,24 +14,50 @@ $exc=arrayParaString($EXCLUDE_USERS);
   foreach ($users as &$user) {
 
     try {
+      $arr = $ldap->getNewUserInfo($user['mail'],$user['name']);
+      $user['new_dn'] = $arr['dn'];
+      $user['new_uid'] = $arr['uid'];
+
       $sql = "SELECT id FROM glpi_useremails where email = :mail";
       $stmt2 = $conn_new->prepare($sql);
       $stmt2->bindParam(':mail', $user['mail'],PDO::PARAM_STR);
       $stmt2->execute();
-      $id = $stmt2->fetchColumn();
+      $idMail = $stmt2->fetchColumn();
 
-      //User already exist on the database.. go to the next user
-      if( $id > 0){
-        echo 'user '.$user['mail'].' already exists! '. PHP_EOL;
-        $user['new_id'] = $id;   
+      $sql = "SELECT id FROM glpi_users where name = :name";
+      $stmt2 = $conn_new->prepare($sql);
+      $stmt2->bindParam(':name', $user['new_uid'],PDO::PARAM_STR);
+      $stmt2->execute();
+      $idName = $stmt2->fetchColumn();
+
+      //User email and name already exists on the database.. go to the next array user
+      if( $idMail > 0 && $idName > 0){ 
+        echo 'user '.$user['new_uid'].' already exists! '. PHP_EOL;
+        $user['new_id'] = $idMail;   
         continue;
-
+      //User exists with a different email.. we add this email to the user profile
+      }else if($idName > 0){
+        try{
+          echo 'user '.$user['name'].' already exists! with a different email '. PHP_EOL;
+          $conn_new->beginTransaction();
+          $sql = "INSERT INTO glpi_useremails
+          (users_id, email) VALUES
+          (:id, :email)";
+          $stmt2 = $conn_new->prepare($sql);
+          $stmt2->bindParam(':id', $idName, PDO::PARAM_INT);
+          $stmt2->bindParam(':email', $user['mail'],PDO::PARAM_STR);
+          $stmt2->execute();
+          $conn_new->commit();
+          continue;
+        }
+        catch(PDOException $e) {
+          echo "Error: " . $e->getMessage().PHP_EOL;
+          $conn_new->rollBack();
+        }
+      
       //User doesn't exist on the database.. we need to insert the user from the old database to the new one 
       }else{
-        $arr = $ldap->getNewUserInfo($user['mail'],$user['name']);
-        $user['new_dn'] = $arr['dn'];
-        $user['new_uid'] = $arr['uid'];
-              
+        echo 'Creating user '.$user['new_uid'].' !!! '. PHP_EOL;
 
         $sql = "INSERT INTO glpi_users 
                 (name,password,mobile,realname,firstname,locations_id,use_mode,is_active,auths_id,authtype,is_deleted,profiles_id,entities_id,usertitles_id,usercategories_id,user_dn,
@@ -106,9 +132,7 @@ $exc=arrayParaString($EXCLUDE_USERS);
             $stmt2->bindParam(':is_dynamic', $old_profile['is_dynamic'],PDO::PARAM_STR);
             $stmt2->bindParam(':is_default_profile', $old_profile['is_default_profile'],PDO::PARAM_STR);
             $stmt2->execute();
-
           }
-        
           $conn_new->commit();
         }
         catch(PDOException $e) {

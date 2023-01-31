@@ -7,7 +7,7 @@ $sql="SELECT id, tickets_id, users_id, type, use_notification, alternative_email
 
   try{
     $conn_new->beginTransaction();
-    foreach ($tickets_users as $tu) {
+    foreach ($tickets_users as &$tu) {
 
       $sql = "INSERT INTO glpi_tickets_users (tickets_id, users_id, type, use_notification, alternative_email) 
               VALUES (:tickets_id, :users_id, :type, :use_notification, :alternative_email );";

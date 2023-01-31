@@ -36,9 +36,12 @@ try{
       
       $stmt2->bindParam(':status', $tick['status'],PDO::PARAM_INT);
 
-      $users_id_recipient = getNewUserID($tick['users_id_recipient']);
-      $stmt2->bindParam(':users_id_recipient', $users_id_recipient, PDO::PARAM_INT);
-      
+      if($tick['users_id_recipient'] <= 0)
+        $stmt2->bindParam(':users_id_recipient', 0, PDO::PARAM_INT);
+      else{
+        $users_id_recipient = getNewUserID($tick['users_id_recipient']);
+        $stmt2->bindParam(':users_id_recipient', $users_id_recipient, PDO::PARAM_INT);
+      }
       $stmt2->bindParam(':content', $tick['content'],PDO::PARAM_STR);
       $stmt2->bindParam(':urgency', $tick['urgency'],PDO::PARAM_INT);
       $stmt2->bindParam(':impact', $tick['impact'],PDO::PARAM_INT);
