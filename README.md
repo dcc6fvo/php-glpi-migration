@@ -1,4 +1,4 @@
-# php-glpi-tickets-migration
+# php-glpi-migration
 
 This is a PHP script for the migration from three different GLPI installs to a fresh new GLPI 10.0.5 install.
 
