@@ -8,6 +8,8 @@ $sql="SELECT id, entities_id, is_recursive, name, filename, filepath, documentca
   $stmt->execute();
   $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
   
+  echo 'Migrating documents...'. PHP_EOL;
+
   try{
     $conn_new->beginTransaction();
     foreach ($documents as &$doc) {

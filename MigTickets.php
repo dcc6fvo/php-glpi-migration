@@ -10,6 +10,8 @@ $stmt = $conn_old->prepare($sql);
 $stmt->execute();
 $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+echo 'Migrating tickets...'. PHP_EOL;
+
 try{
   $conn_new->beginTransaction();
   foreach ($tickets as &$tick) {
@@ -31,14 +33,20 @@ try{
       $stmt2->bindParam(':solvedate', $tick['solvedate'],PDO::PARAM_STR);
       $stmt2->bindParam(':date_mod', $tick['date_mod'],PDO::PARAM_STR);
       
-      $users_id_lastupdater = getNewUserID($tick['users_id_lastupdater']);
-      $stmt2->bindParam(':users_id_lastupdater', $users_id_lastupdater, PDO::PARAM_INT);
-      
+      if($tick['users_id_lastupdater'] <= 0 || $tick['users_id_lastupdater'] = ''){
+        $zero=0;  
+        $stmt2->bindParam(':users_id_lastupdater', $zero, PDO::PARAM_INT);
+      } 
+      else{
+        $users_id_lastupdater = getNewUserID($tick['users_id_lastupdater']);
+        $stmt2->bindParam(':users_id_lastupdater', $users_id_lastupdater, PDO::PARAM_INT);
+      }
       $stmt2->bindParam(':status', $tick['status'],PDO::PARAM_INT);
 
-      if($tick['users_id_recipient'] <= 0)
-        $stmt2->bindParam(':users_id_recipient', 0, PDO::PARAM_INT);
-      else{
+      if($tick['users_id_recipient'] <= 0 || $tick['users_id_recipient'] = ''){
+        $zero=0;
+        $stmt2->bindParam(':users_id_recipient', $zero, PDO::PARAM_INT);
+      }else{
         $users_id_recipient = getNewUserID($tick['users_id_recipient']);
         $stmt2->bindParam(':users_id_recipient', $users_id_recipient, PDO::PARAM_INT);
       }
@@ -81,51 +89,4 @@ try{
   include 'MigTicketsUsers.php';
   include 'MigTicketsItilFollowups.php';
   include 'MigTicketsItilSolutions.php';
-
-  function getNewUserID($oldId) {
-
-    global $users;
-    global $conn_old;  
-
-    $result = findNewID($users,$oldId);
-
-    if($result == 0){
-      $sql = "SELECT gue.email as mail FROM glpi_users gu, glpi_useremails gue where gu.id = gue.users_id 
-              and gu.id = :oldid ";
-      $stmt = $conn_old->prepare($sql);
-      $stmt->bindParam(':oldid', $oldId, PDO::PARAM_STR);
-      $stmt->execute();
-      $mail = $stmt->fetchColumn();
-      return findNewIDbyMail($users,$mail);
-    }else{
-      return $result;
-    }  
-  }
-
-  function findNewID($arr, $id){
-
-    if($id == 0)
-      return $id;
-
-    foreach ($arr as $item) {
-      if ($item['id'] == $id){
-        //print_r($item);
-        //echo('old id = '.$oldId. ' new id = '.$u['new_id']). PHP_EOL;
-        return $item['new_id'];
-      }    
-    }
-    return 0;
-  }
-
-  function findNewIDbyMail($arr, $mail){
-
-    foreach ($arr as $item) {
-      if ($item['mail'] == $mail){
-        return $item['new_id'];
-      }    
-    }
-    return 0;
-  }
-
-
   ?>

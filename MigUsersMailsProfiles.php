@@ -11,6 +11,8 @@ $exc=arrayParaString($EXCLUDE_USERS);
   $stmt->execute();
   $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+  echo 'Migrating users...'. PHP_EOL;
+
   foreach ($users as &$user) {
 
     try {
@@ -18,7 +20,7 @@ $exc=arrayParaString($EXCLUDE_USERS);
       $user['new_dn'] = $arr['dn'];
       $user['new_uid'] = $arr['uid'];
 
-      $sql = "SELECT id FROM glpi_useremails where email = :mail";
+      $sql = "SELECT users_id FROM glpi_useremails where email = :mail";
       $stmt2 = $conn_new->prepare($sql);
       $stmt2->bindParam(':mail', $user['mail'],PDO::PARAM_STR);
       $stmt2->execute();
@@ -35,7 +37,7 @@ $exc=arrayParaString($EXCLUDE_USERS);
         echo 'user '.$user['new_uid'].' already exists! '. PHP_EOL;
         $user['new_id'] = $idMail;   
         continue;
-      //User exists with a different email.. we add this email to the user profile
+      //User exists but with a different email.. we add this email to the user profile
       }else if($idName > 0){
         try{
           echo 'user '.$user['name'].' already exists! with a different email '. PHP_EOL;
@@ -48,6 +50,7 @@ $exc=arrayParaString($EXCLUDE_USERS);
           $stmt2->bindParam(':email', $user['mail'],PDO::PARAM_STR);
           $stmt2->execute();
           $conn_new->commit();
+          $user['new_id'] = $idName;
           continue;
         }
         catch(PDOException $e) {
@@ -120,7 +123,8 @@ $exc=arrayParaString($EXCLUDE_USERS);
             $stmt2 = $conn_new->prepare($sql);
             $stmt2->bindParam(':id', $user['new_id'], PDO::PARAM_STR);
             
-            if ($old_profile['profiles_id'] == $ADMIN_ID || $old_profile['profiles_id'] == $SUPER_ADMIN_ID || $old_profile['profiles_id'] == $TECH_ID ){
+            //if ($old_profile['profiles_id'] == $ADMIN_ID || $old_profile['profiles_id'] == $SUPER_ADMIN_ID || $old_profile['profiles_id'] == $TECH_ID ){
+            if ($old_profile['profiles_id'] <> 1 ){
               $stmt2->bindParam(':profiles_id', $TECH_ID,PDO::PARAM_STR);
               $stmt2->bindParam(':entities_id', $ENTITY_NEW_ID,PDO::PARAM_STR);
             }
@@ -146,5 +150,7 @@ $exc=arrayParaString($EXCLUDE_USERS);
     }  
     //break;
   }
+
+
 
 ?>

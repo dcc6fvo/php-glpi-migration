@@ -11,6 +11,9 @@ $conn_new = '';
 include 'DatabaseInit.php';
 
 try {
+
+  include 'Utils.php';
+
   include 'MigUsersMailsProfiles.php';
   include 'MigLocations.php';
   include 'MigItilCategories.php';
