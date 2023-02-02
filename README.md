@@ -24,7 +24,7 @@ Installation && Running
 
 1) Do a git clone of the project:
 
-		git clone https://github.com/dcc6fvo/php-glpi-tickets-migration
+		git clone https://github.com/dcc6fvo/php-glpi-migration
 	
 2) Specify your parameters on Params.sample.php. Copy your modified file to Params.php.
 
