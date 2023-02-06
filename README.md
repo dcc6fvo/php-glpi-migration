@@ -8,7 +8,9 @@ This is a PHP script for the migration from three different GLPI installs to a f
   - Users that are admins, superadmins, supervisors or technicians in an old instance are imported as a technician for their correspondent entity;
   - We use the following GLPI database tables: glpi_users, glpi_useremails, glpi_profiles_users, glpi_locations, glpi_tickets, glpi_tickets_tickets, glpi_tickets_users, glpi_itilfollowups, glpi_itilsolutions, glpi_itilcategories, glpi_documents and glpi_documents_items;
   - We change the user DN for the new one that is configure in the new LDAP base;
-  
+
+The image below summarizes what you may do with this script:
+
 <p align="center">
   <img src="img/glpi-migration.drawio.png" alt="GLPI data migration">
 </p>
